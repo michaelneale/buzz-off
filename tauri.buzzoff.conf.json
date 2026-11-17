@@ -1,0 +1,5 @@
+{
+  "productName": "BuzzOff",
+  "identifier": "com.michaelneale.buzzoff",
+  "bundle": { "createUpdaterArtifacts": false }
+}
