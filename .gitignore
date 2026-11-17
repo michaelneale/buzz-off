@@ -1,3 +1,5 @@
 .work/
 dist/
 base_prompt.original.md
+base_prompt.diff
+build.log
