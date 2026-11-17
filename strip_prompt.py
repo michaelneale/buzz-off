@@ -14,25 +14,29 @@ DROP_BULLETS = [
     "Your commits use the git identity of the person running you",
 ]
 
-def drop_section(text, heading):
+def drop_section(text, heading, strict=True):
     level = len(heading.split()[0])
     pat = re.compile(rf"(?ms)^{re.escape(heading)}\s*\n.*?(?=^#{{1,{level}}} |\Z)")
     new, n = pat.subn("", text)
-    if not n: sys.exit(f"rule matched nothing: section {heading!r}")
+    if not n and strict: sys.exit(f"rule matched nothing: section {heading!r}")
     return new
 
-def drop_bullet(text, needle):
+def drop_bullet(text, needle, strict=True):
     pat = re.compile(rf"(?m)^- [^\n]*{re.escape(needle)}[^\n]*\n?")
     new, n = pat.subn("", text)
-    if not n: sys.exit(f"rule matched nothing: bullet {needle!r}")
+    if not n and strict: sys.exit(f"rule matched nothing: bullet {needle!r}")
     return new
 
-path = sys.argv[1]
-src = open(path).read()
-out = src
-for h in DROP_SECTIONS: out = drop_section(out, h)
-for b in DROP_BULLETS:  out = drop_bullet(out, b)
-out = re.sub(r"\n{3,}", "\n\n", out).rstrip() + "\n"
-open(path, "w").write(out)
-print(f"base_prompt.md: {len(src.splitlines())} -> {len(out.splitlines())} lines, "
-      f"{len(src)} -> {len(out)} bytes", file=sys.stderr)
+def strip(text, strict=True):
+    out = text
+    for h in DROP_SECTIONS: out = drop_section(out, h, strict)
+    for b in DROP_BULLETS:  out = drop_bullet(out, b, strict)
+    return re.sub(r"\n{3,}", "\n\n", out)
+
+if __name__ == "__main__":
+    path = sys.argv[1]
+    src = open(path).read()
+    out = strip(src).rstrip() + "\n"
+    open(path, "w").write(out)
+    print(f"base_prompt.md: {len(src.splitlines())} -> {len(out.splitlines())} lines, "
+          f"{len(src)} -> {len(out)} bytes", file=sys.stderr)
